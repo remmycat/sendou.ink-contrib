@@ -11,26 +11,21 @@ jobs:
     permissions:
       issues: write
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version-file: ".nvmrc"
-
-      - name: Cache dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: npm-${{ hashFiles('package-lock.json') }}
-          restore-keys: npm-
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci --ignore-scripts
 
+      - name: Check for translation errors and progress
+        run: npm run check-translation-jsons
+
       - name: Update translation progress issue
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          npm run check-translation-jsons
-          gh issue edit 1104 --body-file ./translation-progress.md
+        run: gh issue edit 1 --body-file ./translation-progress.md
